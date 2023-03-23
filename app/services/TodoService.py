@@ -1,7 +1,16 @@
-from sqlmodel import Session, select
+import strawberry
+
+from sqlmodel import Session, select, asc, desc
 
 from app.models.Todo import Todo
 from app.request.TodoRequest import TodoRequest
+from enum import Enum
+
+
+@strawberry.enum
+class SortOrder(Enum):
+    ASC = "asc"
+    DESC = "desc"
 
 
 class TodoService:
@@ -16,21 +25,27 @@ class TodoService:
 
         return new_todo
 
-    async def get_todo(self, todo_id):
+    async def get_todo(self, todo_id: int):
         query = (
             select(Todo)
-            .where(Todo.todo_id == todo_id)
+            .where(Todo.id == todo_id)
         )
 
         result = await self.session.execute(query)
         return result.one()
 
-    async def get_todos(self, page: int, limit: int):
+    async def get_todos(self, page: int, limit: int, order_by: str, sort_direction):
         query = (
             select(Todo)
             .offset(page * limit)
             .limit(limit)
         )
+
+        if order_by == "id":
+            query = query.order_by(asc(Todo.id) if sort_direction == SortOrder.ASC else desc(Todo.id))
+
+        if order_by == "label":
+            query = query.order_by(asc(Todo.label) if sort_direction == SortOrder.ASC else desc(Todo.label))
 
         data = await self.session.execute(query)
         return data.scalars().all()

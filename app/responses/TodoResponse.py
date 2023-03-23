@@ -3,5 +3,5 @@ import strawberry
 
 @strawberry.type
 class TodoResponse:
-    todo_id: int
+    id: int
     label: str
