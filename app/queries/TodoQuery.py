@@ -1,20 +1,10 @@
 import strawberry
 from strawberry.types import Info
 
-
+from app.errors.TodoNotFound import TodoNotFound
+from app.responses.OneTodoResponse import OneTodoResponse
 from app.responses.TodoResponse import TodoResponse
 from app.services.TodoService import TodoService, SortOrder
-
-
-@strawberry.type
-class TodoNotFound:
-    id: int
-    message: str
-
-
-OneTodoResponse = strawberry.union(
-    "GetTodoResponse", [TodoResponse, TodoNotFound]
-)
 
 
 @strawberry.type

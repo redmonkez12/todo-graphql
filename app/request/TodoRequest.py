@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+import strawberry
 
 
-class TodoRequest(BaseModel):
+@strawberry.type
+class TodoRequest:
     label: str

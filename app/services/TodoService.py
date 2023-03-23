@@ -1,10 +1,12 @@
 import strawberry
 
-from sqlmodel import Session, select, asc, desc
+from sqlmodel import Session, select, asc, desc, delete, update
 
 from app.models.Todo import Todo
-from app.request.TodoRequest import TodoRequest
 from enum import Enum
+
+from app.request.TodoRequest import TodoRequest
+from app.request.UpdateTodoRequest import UpdateTodoRequest
 
 
 @strawberry.enum
@@ -50,21 +52,23 @@ class TodoService:
         data = await self.session.execute(query)
         return data.scalars().all()
 
-    # async def update_todo(self, new_todo: UpdateTodoRequest):
-    #     query = (
-    #         update(Todo)
-    #         .values(label=new_todo.label)
-    #         .where(Todo.todo_id == new_todo.todo_id)
-    #     )
-    #
-    #     await self.session.execute(query)
-    #     await self.session.commit()
-    #
-    # async def delete_todo(self, todo_id: int):
-    #     query = (
-    #         delete(Todo)
-    #         .where(Todo.todo_id == todo_id)
-    #     )
-    #
-    #     await self.session.execute(query)
-    #     await self.session.commit()
+    async def update_todo(self, new_todo: UpdateTodoRequest):
+        query = (
+            update(Todo)
+            .values(label=new_todo.label)
+            .where(Todo.id == new_todo.id)
+            .returning(Todo.id, Todo.label)
+        )
+
+        result = await self.session.execute(query)
+        await self.session.commit()
+        return result.one()
+
+    async def delete_todo(self, todo_id: int):
+        query = (
+            delete(Todo)
+            .where(Todo.id == todo_id)
+        )
+
+        await self.session.execute(query)
+        await self.session.commit()
