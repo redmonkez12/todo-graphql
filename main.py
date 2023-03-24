@@ -3,18 +3,21 @@ from fastapi import FastAPI, Depends
 from strawberry.tools import merge_types
 from strawberry.fastapi import GraphQLRouter
 
-from app.deps import get_todo_service
+from app.deps import get_todo_service, get_user_service
 from app.mutations.TodoMutation import TodoMutation
 from app.queries.TodoQuery import TodoQuery
 from app.services.TodoService import TodoService
+from app.services.UserService import UserService
 from database import init_db
 
 
 async def get_context(
         todo_service: TodoService = Depends(get_todo_service),
+        user_service: UserService = Depends(get_user_service),
 ):
     return {
         "todo_service": todo_service,
+        "user_service": user_service,
     }
 
 

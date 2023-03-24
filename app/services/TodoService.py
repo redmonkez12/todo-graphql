@@ -30,7 +30,7 @@ class TodoService:
     async def get_todo(self, todo_id: int):
         query = (
             select(Todo)
-            .where(Todo.id == todo_id)
+            .where(Todo.todo_id == todo_id)
         )
 
         result = await self.session.execute(query)
@@ -43,8 +43,8 @@ class TodoService:
             .limit(limit)
         )
 
-        if order_by == "id":
-            query = query.order_by(asc(Todo.id) if sort_direction == SortOrder.ASC else desc(Todo.id))
+        if order_by == "todoId":
+            query = query.order_by(asc(Todo.todo_id) if sort_direction == SortOrder.ASC else desc(Todo.todo_id))
 
         if order_by == "label":
             query = query.order_by(asc(Todo.label) if sort_direction == SortOrder.ASC else desc(Todo.label))
@@ -56,8 +56,8 @@ class TodoService:
         query = (
             update(Todo)
             .values(label=new_todo.label)
-            .where(Todo.id == new_todo.id)
-            .returning(Todo.id, Todo.label)
+            .where(Todo.todo_id == new_todo.id)
+            .returning(Todo.todo_id, Todo.label)
         )
 
         result = await self.session.execute(query)
@@ -67,7 +67,7 @@ class TodoService:
     async def delete_todo(self, todo_id: int):
         query = (
             delete(Todo)
-            .where(Todo.id == todo_id)
+            .where(Todo.todo_id == todo_id)
         )
 
         await self.session.execute(query)
