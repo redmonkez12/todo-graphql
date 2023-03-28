@@ -1,19 +1,32 @@
 import asyncpg
+import strawberry
 from sqlmodel import Session, select
-from sqlalchemy import exc, func
+from sqlalchemy import exc
 
-from app.auth.password import get_password_hash
+from app.auth.password import get_password_hash, verify_password
 from app.exceptions.EmailDuplicationException import EmailDuplicationException
+from app.exceptions.UserNotFoundException import UserNotFoundException
 from app.models.User import User
 from app.models.UserPassword import UserPassword
 from app.request import UserCreateRequest
+from app.request.LoginRequest import LoginRequest
+
+
+@strawberry.type
+class CreateUserModel:
+    user_id: int
+    first_name: str
+    last_name: str
+    email: str
+    birthdate: str
+    username: str
 
 
 class UserService:
     def __init__(self, session: Session):
         self.session = session
 
-    async def create_user(self, data: UserCreateRequest):
+    async def create_user(self, data: UserCreateRequest) -> CreateUserModel:
         try:
             new_user = User(
                 first_name=data.first_name,
@@ -27,7 +40,13 @@ class UserService:
             self.session.add(new_user)
             await self.session.commit()
 
-            return new_user
+            return CreateUserModel(user_id=new_user.user_id,
+                                   first_name=new_user.first_name,
+                                   last_name=new_user.last_name,
+                                   email=new_user.email,
+                                   username=new_user.birthdate,
+                                   birthdate=new_user.birthdate,
+                                   )
         except (exc.IntegrityError, asyncpg.exceptions.UniqueViolationError):
             raise EmailDuplicationException(f"Email [{data.email}] already exists")
         except Exception as e:
@@ -44,16 +63,16 @@ class UserService:
         result = await self.session.execute(query)
         return result.first()
 
-    # async def login(self, data: LoginRequest):
-    #     user = await self.get_by_username(data.username)
-    #
-    #     if not user:
-    #         raise UserNotFoundException("Username or password is invalid")
-    #
-    #     if not verify_password(data.password, user.password):
-    #         raise UserNotFoundException("Username or password is invalid")
-    #
-    #     return user
+    async def login(self, data: LoginRequest):
+        user = await self.get_by_username(data.username)
+
+        if not user:
+            raise UserNotFoundException("Username or password is invalid")
+
+        if not verify_password(data.password, user.password):
+            raise UserNotFoundException("Username or password is invalid")
+
+        return user
 
     # async def change_password(self, user: User, request_data: ChangePasswordRequest):
     #     if not verify_password(request_data.old_password, user.password):
