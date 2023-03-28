@@ -1,7 +1,7 @@
 import strawberry
 from strawberry.types import Info
 
-from app.request.CreateUserRequest import CreateUserRequest
+from app.request.UserCreateRequest import CreateUserRequest
 from app.services.UserService import UserService
 
 

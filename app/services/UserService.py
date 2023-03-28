@@ -2,9 +2,11 @@ import asyncpg
 from sqlmodel import Session, select
 from sqlalchemy import exc, func
 
-from app.auth.password import get_password_hash, verify_password
+from app.auth.password import get_password_hash
+from app.exceptions.EmailDuplicationException import EmailDuplicationException
 from app.models.User import User
 from app.models.UserPassword import UserPassword
+from app.request import UserCreateRequest
 
 
 class UserService:
@@ -42,31 +44,31 @@ class UserService:
         result = await self.session.execute(query)
         return result.first()
 
-    async def login(self, data: LoginRequest):
-        user = await self.get_by_username(data.username)
+    # async def login(self, data: LoginRequest):
+    #     user = await self.get_by_username(data.username)
+    #
+    #     if not user:
+    #         raise UserNotFoundException("Username or password is invalid")
+    #
+    #     if not verify_password(data.password, user.password):
+    #         raise UserNotFoundException("Username or password is invalid")
+    #
+    #     return user
 
-        if not user:
-            raise UserNotFoundException("Username or password is invalid")
-
-        if not verify_password(data.password, user.password):
-            raise UserNotFoundException("Username or password is invalid")
-
-        return user
-
-    async def change_password(self, user: User, request_data: ChangePasswordRequest):
-        if not verify_password(request_data.old_password, user.password):
-            raise UserNotFoundException("Password is invalid")
-
-        query = (
-            select(UserPassword)
-            .where(UserPassword.user_id == user.user_id)
-            .limit(1)
-        )
-
-        data = await self.session.execute(query)
-        user_password = data.scalars().first()
-
-        user_password.value = get_password_hash(request_data.new_password)
-        user_password.updated_at = func.now()
-
-        await self.session.commit()
+    # async def change_password(self, user: User, request_data: ChangePasswordRequest):
+    #     if not verify_password(request_data.old_password, user.password):
+    #         raise UserNotFoundException("Password is invalid")
+    #
+    #     query = (
+    #         select(UserPassword)
+    #         .where(UserPassword.user_id == user.user_id)
+    #         .limit(1)
+    #     )
+    #
+    #     data = await self.session.execute(query)
+    #     user_password = data.scalars().first()
+    #
+    #     user_password.value = get_password_hash(request_data.new_password)
+    #     user_password.updated_at = func.now()
+    #
+    #     await self.session.commit()
