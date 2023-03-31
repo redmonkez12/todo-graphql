@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-from fastapi import Depends, status, HTTPException
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 
 from app.auth.token import SECRET_KEY, ALGORITHM
+from app.exceptions.UserNotAuthorizedException import UserNotAuthorizedException
 from app.repository.GetByUsername import GetByUsername
 from app.services.UserService import UserService
 
@@ -18,11 +18,7 @@ async def get_current_user(
         token: str,
         user_service: UserService
 ) -> GetByUsername:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    credentials_exception = UserNotAuthorizedException("Could not validate credentials")
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

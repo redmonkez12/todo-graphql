@@ -3,11 +3,13 @@ from strawberry.types import Info
 
 from app.auth.token import create_access_token
 from app.errors.ErrorResponse import ErrorResponse
+from app.exceptions.UserNotAuthorizedException import UserNotAuthorizedException
+from app.exceptions.UserNotFoundException import UserNotFoundException
 from app.repository.GetByUsername import GetByUsername
 from app.request.ChangePasswordRequest import ChangePasswordRequest
 from app.request.LoginRequest import LoginRequest
 from app.request.UserCreateRequest import CreateUserRequest
-from app.responses.ChangePasswordResponse import EmptyResponse
+from app.responses.ChangePasswordResponse import ChangeResultResponse, ChangePasswordResponse
 from app.responses.UserLoginResponse import LoginResultResponse, UserLoginResponse
 from app.services.UserService import UserService, CreateUserModel
 
@@ -34,19 +36,23 @@ class UserMutation:
 
             return UserLoginResponse(access_token=access_token, token_type="bearer")
         except Exception as e:
-            print(e)
             return ErrorResponse(message="something went wrong", code="ERROR")
 
     @strawberry.mutation
-    async def change_password(self, info: Info, data: ChangePasswordRequest) -> EmptyResponse:
-        # try:
-        user_service: UserService = info.context["user_service"]
-        user: GetByUsername = info.context["user"]
-        await user_service.change_password(user, data)
+    async def change_password(self, info: Info, data: ChangePasswordRequest) -> ChangeResultResponse:
+        try:
+            user_service: UserService = info.context["user_service"]
+            get_user = info.context["get_user"]
+            user: GetByUsername = await get_user()
+            await user_service.change_password(user, data)
 
-        return EmptyResponse(xxx="Password changed")
-        # except Exception as e:
-        #     print(e)
-        #     return ErrorResponse(message="something went wrong", code="ERROR")
+            return ChangePasswordResponse(message="Password changed")
+        except UserNotAuthorizedException as e:
+            return ErrorResponse(message=str(e), code="ERROR")
+        except UserNotFoundException as e:
+            return ErrorResponse(message=str(e), code="ERROR")
+        except Exception as e:
+            print(e)
+            return ErrorResponse(message="something went wrong", code="ERROR")
 
 

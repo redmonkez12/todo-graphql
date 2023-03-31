@@ -4,10 +4,8 @@ from app.errors.ErrorResponse import ErrorResponse
 
 
 @strawberry.type
-class EmptyResponse:
-    xxx: str
+class ChangePasswordResponse:
+    message: str
 
 
-ChangePasswordResponse = strawberry.union(
-    "ChangePasswordResponse", [EmptyResponse, ErrorResponse],
-)
+ChangeResultResponse = strawberry.union("ChangeResultResponse", [ChangePasswordResponse, ErrorResponse])
