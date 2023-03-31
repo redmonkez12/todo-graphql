@@ -1,6 +1,7 @@
 import strawberry
 from strawberry.types import Info
 
+from app.errors.TodoDuplication import TodoDuplication
 from app.errors.TodoNotFound import TodoNotFound
 from app.request.TodoRequest import TodoRequest
 from app.request.UpdateTodoRequest import UpdateTodoRequest
@@ -16,8 +17,9 @@ class TodoMutation:
         try:
             todo_service: TodoService = info.context["todo_service"]
             return await todo_service.create_todo(TodoRequest(label=label))
-        except Exception:
-            return TodoNotFound(id=id, message=f"Todo [{id}] not found")
+        except Exception as e:
+            print(e)
+            return TodoDuplication(label=label, message=f"Todo [{label}] already exists")
 
     @strawberry.mutation
     async def update_todo(self, info: Info, todo: UpdateTodoRequest) -> OneTodoResponse:

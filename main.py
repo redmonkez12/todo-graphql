@@ -5,6 +5,7 @@ from strawberry.fastapi import GraphQLRouter
 
 from app.deps import get_todo_service, get_user_service
 from app.mutations.TodoMutation import TodoMutation
+from app.mutations.UserMutation import UserMutation
 from app.queries.TodoQuery import TodoQuery
 from app.services.TodoService import TodoService
 from app.services.UserService import UserService
@@ -35,7 +36,7 @@ class Query:
 
 
 all_queries = merge_types("AllQueries", (Query, TodoQuery))
-all_mutations = merge_types("AllMutations", (TodoMutation,))
+all_mutations = merge_types("AllMutations", (TodoMutation, UserMutation))
 
 schema = strawberry.Schema(query=all_queries, mutation=all_mutations)
 
