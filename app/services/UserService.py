@@ -10,7 +10,9 @@ from app.exceptions.EmailDuplicationException import EmailDuplicationException
 from app.exceptions.UserNotFoundException import UserNotFoundException
 from app.models.User import User
 from app.models.UserPassword import UserPassword
+from app.repository.GetByUsername import GetByUsername
 from app.request import UserCreateRequest
+from app.request.ChangePasswordRequest import ChangePasswordRequest
 from app.request.LoginRequest import LoginRequest
 
 

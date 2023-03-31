@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+import strawberry
 
 
-class GetByUsername(BaseModel):
+@strawberry.type
+class GetByUsername:
     user_id: int
     username: str
     email: str

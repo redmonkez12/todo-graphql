@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 
 from app.auth.token import SECRET_KEY, ALGORITHM
-from app.deps import get_user_service
+from app.repository.GetByUsername import GetByUsername
 from app.services.UserService import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -17,7 +17,7 @@ class TokenData(BaseModel):
 async def get_current_user(
         token: str,
         user_service: UserService
-):
+) -> GetByUsername:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

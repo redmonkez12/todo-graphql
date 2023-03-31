@@ -3,15 +3,17 @@ from strawberry.types import Info
 
 from app.auth.token import create_access_token
 from app.errors.ErrorResponse import ErrorResponse
+from app.repository.GetByUsername import GetByUsername
+from app.request.ChangePasswordRequest import ChangePasswordRequest
 from app.request.LoginRequest import LoginRequest
 from app.request.UserCreateRequest import CreateUserRequest
+from app.responses.ChangePasswordResponse import EmptyResponse
 from app.responses.UserLoginResponse import LoginResultResponse, UserLoginResponse
 from app.services.UserService import UserService, CreateUserModel
 
 
 @strawberry.type
 class UserMutation:
-
     @strawberry.mutation
     async def create_user(self, info: Info, data: CreateUserRequest) -> CreateUserModel:
         user_service: UserService = info.context["user_service"]
@@ -19,8 +21,8 @@ class UserMutation:
         new_user = await user_service.create_user(data)
         return new_user
 
-    @strawberry.mutation
-    async def login_user(self, info: Info, data: LoginRequest) -> LoginResultResponse:
+    @strawberry.field
+    async def login(self, info: Info, data: LoginRequest) -> LoginResultResponse:
         try:
             user_service: UserService = info.context["user_service"]
 
@@ -34,3 +36,17 @@ class UserMutation:
         except Exception as e:
             print(e)
             return ErrorResponse(message="something went wrong", code="ERROR")
+
+    @strawberry.mutation
+    async def change_password(self, info: Info, data: ChangePasswordRequest) -> EmptyResponse:
+        # try:
+        user_service: UserService = info.context["user_service"]
+        user: GetByUsername = info.context["user"]
+        await user_service.change_password(user, data)
+
+        return EmptyResponse(xxx="Password changed")
+        # except Exception as e:
+        #     print(e)
+        #     return ErrorResponse(message="something went wrong", code="ERROR")
+
+
