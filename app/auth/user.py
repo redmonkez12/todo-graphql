@@ -15,8 +15,8 @@ class TokenData(BaseModel):
 
 
 async def get_current_user(
-        token: str = Depends(oauth2_scheme),
-        user_service: UserService = Depends(get_user_service)
+        token: str,
+        user_service: UserService
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
