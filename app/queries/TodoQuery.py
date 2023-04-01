@@ -1,6 +1,8 @@
 import strawberry
 from strawberry.types import Info
+from sqlalchemy.exc import NoResultFound
 
+from app.errors.ErrorResponse import ErrorResponse
 from app.errors.TodoNotFound import TodoNotFound
 from app.responses.OneTodoResponse import OneTodoResponse
 from app.responses.TodoResponse import TodoResponse
@@ -24,5 +26,7 @@ class TodoQuery:
         try:
             todo_service: TodoService = info.context["todo_service"]
             return await todo_service.get_todo(todo_id)
+        except NoResultFound:
+            return TodoNotFound(id=todo_id, message=f"Todo [{todo_id}] not found")
         except Exception:
-            return TodoNotFound(id=id, message=f"Todo [{todo_id}] not found")
+            return ErrorResponse()

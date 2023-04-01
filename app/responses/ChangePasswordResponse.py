@@ -8,4 +8,6 @@ class ChangePasswordResponse:
     message: str
 
 
-ChangeResultResponse = strawberry.union("ChangeResultResponse", [ChangePasswordResponse, ErrorResponse])
+ChangeResultResponse = strawberry.union(
+    "ChangeResultResponse", (ChangePasswordResponse, ErrorResponse),
+)

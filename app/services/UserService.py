@@ -48,7 +48,7 @@ class UserService:
                                    first_name=new_user.first_name,
                                    last_name=new_user.last_name,
                                    email=new_user.email,
-                                   username=new_user.birthdate,
+                                   username=new_user.username,
                                    birthdate=new_user.birthdate,
                                    )
         except (exc.IntegrityError, asyncpg.exceptions.UniqueViolationError):

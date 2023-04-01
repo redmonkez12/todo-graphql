@@ -27,7 +27,6 @@ class UserMutation:
     async def login(self, info: Info, data: LoginRequest) -> LoginResultResponse:
         try:
             user_service: UserService = info.context["user_service"]
-
             user = await user_service.login(data)
 
             access_token = create_access_token(
@@ -36,7 +35,7 @@ class UserMutation:
 
             return UserLoginResponse(access_token=access_token, token_type="bearer")
         except Exception as e:
-            return ErrorResponse(message="something went wrong", code="ERROR")
+            return ErrorResponse()
 
     @strawberry.mutation
     async def change_password(self, info: Info, data: ChangePasswordRequest) -> ChangeResultResponse:
@@ -48,11 +47,9 @@ class UserMutation:
 
             return ChangePasswordResponse(message="Password changed")
         except UserNotAuthorizedException as e:
-            return ErrorResponse(message=str(e), code="ERROR")
+            return ErrorResponse(message=str(e), code="INVALID_CREDENTIALS")
         except UserNotFoundException as e:
-            return ErrorResponse(message=str(e), code="ERROR")
+            return ErrorResponse(message=str(e), code="USER_NOT_FOUND")
         except Exception as e:
             print(e)
-            return ErrorResponse(message="something went wrong", code="ERROR")
-
-
+            return ErrorResponse()

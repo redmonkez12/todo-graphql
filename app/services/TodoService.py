@@ -1,10 +1,14 @@
 import strawberry
+import asyncpg
 
 from sqlmodel import Session, select, asc, desc, delete, update
+from sqlalchemy import exc
 
+from app.exceptions.TodoDuplicationException import TodoDuplicationException
 from app.models.Todo import Todo
 from enum import Enum
 
+from app.repository.GetByUsername import GetByUsername
 from app.request.TodoRequest import TodoRequest
 from app.request.UpdateTodoRequest import UpdateTodoRequest
 
@@ -19,13 +23,16 @@ class TodoService:
     def __init__(self, session: Session):
         self.session = session
 
-    async def create_todo(self, data: TodoRequest):
-        new_todo = Todo(label=data.label)
+    async def create_todo(self, data: TodoRequest, user: GetByUsername):
+        try:
+            new_todo = Todo(label=data.label, user_id=user.user_id)
 
-        self.session.add(new_todo)
-        await self.session.commit()
+            self.session.add(new_todo)
+            await self.session.commit()
 
-        return new_todo
+            return new_todo
+        except (exc.IntegrityError, asyncpg.exceptions.UniqueViolationError):
+            raise TodoDuplicationException(f"Todo [{data.label}] already exists")
 
     async def get_todo(self, todo_id: int):
         query = (
@@ -70,5 +77,6 @@ class TodoService:
             .where(Todo.todo_id == todo_id)
         )
 
-        await self.session.execute(query)
+        result = await self.session.execute(query)
         await self.session.commit()
+        return result.one()
